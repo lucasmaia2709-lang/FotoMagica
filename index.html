@@ -233,19 +233,19 @@
                 originalImageContainer.innerHTML = '';
                 originalImageContainer.appendChild(originalImg);
                 showLoadingSpinner();
-                await generateImage(base64Data, file.type, characterName); 
+                await generateImage(base64Data, characterName); 
             } catch (error) {
                 showError('Ocorreu um erro ao processar a tua imagem.');
             }
         }
 
-        async function generateImage(base64ImageData, mimeType, characterName) {
+        async function generateImage(base64ImageData, characterName) {
             const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
             if (!match) { showError('Formato de imagem inválido.'); return; }
             
             const payload = {
                 imageData: match[2],
-                mimeType: mimeType,
+                mimeType: match[1], // CORREÇÃO: Usar o mimeType fiável da string base64
                 characterName: characterName,
                 userEmail: currentUser.email
             };
@@ -303,3 +303,4 @@
     </script>
 </body>
 </html>
+
