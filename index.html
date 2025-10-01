@@ -82,7 +82,7 @@
             </div>
              <div id="error-message" class="text-center text-red-500 mt-4 font-semibold"></div>
         </div>
-        <p class="text-xs text-center text-gray-400 mt-4">Versão 1.1</p>
+        <p class="text-xs text-center text-gray-400 mt-4">Versão 1.2</p>
     </main>
 
     <script>
@@ -256,6 +256,9 @@
                 characterName: characterName,
                 userEmail: currentUser.email
             };
+            
+            // NOVO: Ferramenta de diagnóstico
+            console.log('Payload a ser enviado:', payload);
 
             try {
                 const response = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
@@ -279,7 +282,7 @@
                 updateCreditsDisplay();
 
             } catch (error) {
-                showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}`);
+                showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}. Verifique a consola (F12) para mais detalhes.`);
             }
         }
         
@@ -310,4 +313,3 @@
     </script>
 </body>
 </html>
-
