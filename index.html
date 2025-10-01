@@ -144,12 +144,17 @@
         }
 
         async function generateImage(base64ImageData, mimeType, characterName) {
-            if (cloudflareWorkerUrl === 'https://fotomagica.lucasabreucotefis.workers.dev') {
-                showError("O URL do backend da Cloudflare não foi configurado no código. Siga as instruções.");
+            // **** ALTERAÇÃO IMPORTANTE ****
+            // O bloco `if` que causava o erro foi REMOVIDO daqui.
+            
+            const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+            
+            if (!match || match.length !== 3) {
+                showError('Não foi possível ler o formato da imagem. Por favor, tente com outra foto.');
                 return;
             }
-
-            const pureBase64 = base64ImageData.split(',')[1];
+            
+            const pureBase64 = match[2];
             
             const payload = {
                 imageData: pureBase64,
@@ -220,6 +225,7 @@
     </script>
 </body>
 </html>
+
 
 
 
