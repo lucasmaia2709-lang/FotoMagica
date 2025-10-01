@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Fotos Mágicas</title>
+    <!-- Carregar o Tailwind CSS para um design moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Infantil (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo personalizado para um aspeto mais infantil */
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f0f9ff; /* Tom de azul-céu muito claro */
+            /* Padrão de estrelas subtil no fundo */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a7ddff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        /* Estilo para animação do spinner */
+        .loader {
+            border: 4px solid #fde68a; /* Amarelo claro */
+            border-top: 4px solid #f97316; /* Laranja vivo */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Esconde o input de ficheiro original */
+        #image-upload { display: none; }
+
+        /* Estilo para a imagem de pré-visualização e resultado */
+        .image-container img {
+            max-height: 400px;
+            width: auto;
+            max-width: 100%;
+            border-radius: 1rem; /* Cantos mais arredondados */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-4xl w-full m-4">
+        
+        <!-- APLICAÇÃO PRINCIPAL -->
+        <div id="app-content">
+            <div class="text-center mb-8 relative">
+                <h1 class="text-3xl sm:text-4xl font-bold text-pink-500">A Tua Foto Mágica! ✨</h1>
+                <p class="text-gray-600 mt-2 text-lg">Junta-te ao teu personagem preferido numa aventura!</p>
+            </div>
+            
+            <div class="mb-6">
+                <label for="character-input" class="block text-sky-800 font-bold mb-3 text-center text-xl">1. Escreve um personagem</label>
+                <input type="text" id="character-input" placeholder="Ex: Mickey Mouse, Elsa..." class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg">
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <label for="image-upload" id="upload-label" class="bg-yellow-400 text-yellow-900 font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-110 shadow-lg text-xl">
+                    2. Anexar a tua foto
+                </label>
+                <input type="file" id="image-upload" accept="image/*">
+            </div>
+
+            <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
+                <div class="text-center">
+                    <h2 class="text-2xl font-semibold mb-3 text-sky-800">A Tua Foto</h2>
+                    <div id="original-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2"></div>
+                </div>
+                <div class="text-center">
+                    <h2 class="text-2xl font-semibold mb-3 text-sky-800">A Magia Aconteceu!</h2>
+                    <div id="generated-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2">
+                        <p class="text-gray-500">À espera da tua foto...</p>
+                    </div>
+                </div>
+            </div>
+             <div id="error-message" class="text-center text-red-500 mt-4 font-semibold"></div>
+        </div>
+    </main>
+
+    <script>
+        // IMPORTANTE: O URL do seu backend da Cloudflare será colocado aqui.
+        const cloudflareWorkerUrl = 'fotomagica.lucasabreucotefis.workers.dev';
+
+        // Variáveis da Interface
+        const imageUpload = document.getElementById('image-upload');
+        const characterInput = document.getElementById('character-input');
+        const resultsSection = document.getElementById('results');
+        const originalImageContainer = document.getElementById('original-image-container');
+        const generatedImageContainer = document.getElementById('generated-image-container');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        let lastFile = null;
+        let lastCharacterName = '';
+
+        imageUpload.addEventListener('change', handleImageUpload);
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            const characterName = characterInput.value.trim();
+            if (!file) return;
+
+            lastFile = file;
+            lastCharacterName = characterName;
+
+            if (!characterName) {
+                showError('Ops! Escreve o nome de um personagem primeiro.');
+                imageUpload.value = ''; 
+                return;
+            }
+            await processAndGenerateImage(file, characterName);
+        }
+        
+        async function retryLastAttempt() {
+            if (!lastFile || !lastCharacterName) {
+                showError("Não há nenhuma tentativa anterior para repetir.");
+                return;
+            }
+            await processAndGenerateImage(lastFile, lastCharacterName);
+        }
+
+        async function processAndGenerateImage(file, characterName) {
+            resetUI();
+            resultsSection.classList.remove('hidden');
+            try {
+                const base64Data = await fileToBase64(file);
+                const originalImg = document.createElement('img');
+                originalImg.src = base64Data;
+                originalImageContainer.innerHTML = '';
+                originalImageContainer.appendChild(originalImg);
+                showLoadingSpinner();
+                await generateImage(base64Data, file.type, characterName); 
+            } catch (error) {
+                console.error('Erro no processamento da imagem:', error);
+                showError('Ocorreu um erro ao processar a tua imagem.');
+            }
+        }
+
+        async function generateImage(base64ImageData, mimeType, characterName) {
+            if (cloudflareWorkerUrl === 'COLE_O_SEU_URL_DA_CLOUDFLARE_AQUI') {
+                showError("O URL do backend da Cloudflare não foi configurado no código. Siga as instruções.");
+                return;
+            }
+
+            const pureBase64 = base64ImageData.split(',')[1];
+            
+            const payload = {
+                imageData: pureBase64,
+                mimeType: mimeType,
+                characterName: characterName
+            };
+
+            try {
+                const response = await fetch(cloudflareWorkerUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `O servidor respondeu com o estado ${response.status}.`);
+                }
+
+                const result = await response.json();
+                
+                if (result.imageBase64) {
+                    const generatedImg = document.createElement('img');
+                    generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
+                    generatedImageContainer.innerHTML = '';
+                    generatedImageContainer.appendChild(generatedImg);
+                    errorMessageDiv.textContent = '';
+                } else {
+                    throw new Error('Não foi possível encontrar a imagem na resposta do servidor.');
+                }
+            } catch (error) {
+                console.error('Erro ao chamar o backend:', error);
+                showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}`);
+            }
+        }
+        
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function resetUI() {
+            errorMessageDiv.textContent = '';
+            resultsSection.classList.add('hidden');
+            originalImageContainer.innerHTML = '';
+            generatedImageContainer.innerHTML = '<p class="text-gray-500">À espera da tua foto...</p>';
+        }
+
+        function showLoadingSpinner() {
+            generatedImageContainer.innerHTML = '<div class="loader"></div>';
+        }
+
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            generatedImageContainer.innerHTML = `
+                <div class="text-center p-4">
+                    <p class="text-red-600 font-bold mb-4 text-lg">Oops! Algo correu mal.</p>
+                    <button onclick="retryLastAttempt()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform transform hover:scale-105">
+                        Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+
+
+
