@@ -87,7 +87,7 @@
 
     <script>
         // IMPORTANTE: O URL do seu backend da Cloudflare será colocado aqui.
-        const cloudflareWorkerUrl = 'https://fotomagica.lucasabreucotefis.workers.dev';
+        const cloudflareWorkerUrl = 'COLE_O_SEU_URL_DA_CLOUDFLARE_AQUI';
 
         // Variáveis da Interface
         const imageUpload = document.getElementById('image-upload');
@@ -144,7 +144,7 @@
         }
 
         async function generateImage(base64ImageData, mimeType, characterName) {
-            if (cloudflareWorkerUrl === 'COLE_O_SEU_URL_DA_CLOUDFLARE_AQUI') {
+            if (cloudflareWorkerUrl === 'https://fotomagica.lucasabreucotefis.workers.dev') {
                 showError("O URL do backend da Cloudflare não foi configurado no código. Siga as instruções.");
                 return;
             }
