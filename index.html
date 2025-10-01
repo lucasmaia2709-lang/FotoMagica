@@ -4,55 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Fotos Mágicas</title>
-    <!-- Carregar o Tailwind CSS para um design moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonte Infantil (Google Fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilo personalizado para um aspeto mais infantil */
-        body {
-            font-family: 'Baloo 2', cursive;
-            background-color: #f0f9ff; /* Tom de azul-céu muito claro */
-            /* Padrão de estrelas subtil no fundo */
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a7ddff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        /* Estilo para animação do spinner */
-        .loader {
-            border: 4px solid #fde68a; /* Amarelo claro */
-            border-top: 4px solid #f97316; /* Laranja vivo */
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Esconde o input de ficheiro original */
+        body { font-family: 'Baloo 2', cursive; background-color: #f0f9ff; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a7ddff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .loader { border: 4px solid #fde68a; border-top: 4px solid #f97316; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #image-upload { display: none; }
-
-        /* Estilo para a imagem de pré-visualização e resultado */
-        .image-container img {
-            max-height: 400px;
-            width: auto;
-            max-width: 100%;
-            border-radius: 1rem; /* Cantos mais arredondados */
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-        }
+        .image-container img { max-height: 400px; width: auto; max-width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+        .form-container { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
 
     <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-4xl w-full m-4">
         
-        <!-- APLICAÇÃO PRINCIPAL -->
-        <div id="app-content">
+        <!-- ECRÃ DE LOGIN/REGISTO (mostrado se o utilizador não estiver logado) -->
+        <div id="auth-section" class="form-container">
+            <div class="text-center">
+                <h1 id="auth-title" class="text-3xl sm:text-4xl font-bold text-pink-500">Bem-vindo! ✨</h1>
+                <div id="auth-form-container">
+                    <!-- Formulário de Login -->
+                    <form id="login-form" class="mt-6">
+                        <input type="email" id="login-email" placeholder="O seu email" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-4">
+                        <input type="password" id="login-password" placeholder="A sua palavra-passe" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-6">
+                        <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-105 shadow-lg text-xl">Entrar</button>
+                    </form>
+                    <!-- Formulário de Registo (escondido) -->
+                     <form id="register-form" class="mt-6 hidden">
+                        <input type="email" id="register-email" placeholder="O seu email" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-4">
+                        <input type="password" id="register-password" placeholder="Crie uma palavra-passe" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-6">
+                        <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-105 shadow-lg text-xl">Criar Conta</button>
+                    </form>
+                </div>
+                 <p id="auth-toggle-text" class="text-sm text-gray-500 mt-4">Não tem uma conta? <a href="#" id="show-register" class="text-blue-500 hover:underline">Registe-se aqui.</a></p>
+                 <p id="auth-error" class="text-red-500 mt-4 font-semibold"></p>
+            </div>
+        </div>
+
+        <!-- APLICAÇÃO PRINCIPAL (escondida por defeito) -->
+        <div id="app-content" class="hidden">
             <div class="text-center mb-8 relative">
+                <div class="absolute top-0 right-0">
+                    <span id="credits-display" class="font-bold text-lg text-green-600 mr-4"></span>
+                    <button id="logout-button" class="text-gray-400 hover:text-red-500" title="Sair">Sair</button>
+                </div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-pink-500">A Tua Foto Mágica! ✨</h1>
                 <p class="text-gray-600 mt-2 text-lg">Junta-te ao teu personagem preferido numa aventura!</p>
             </div>
@@ -86,10 +85,21 @@
     </main>
 
     <script>
-        // IMPORTANTE: O URL do seu backend da Cloudflare será colocado aqui.
+        // O URL do seu backend da Cloudflare.
         const cloudflareWorkerUrl = 'https://fotomagica.lucasabreucotefis.workers.dev';
 
-        // Variáveis da Interface
+        // Elementos da UI
+        const authSection = document.getElementById('auth-section');
+        const appContent = document.getElementById('app-content');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegisterLink = document.getElementById('show-register');
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authError = document.getElementById('auth-error');
+        const logoutButton = document.getElementById('logout-button');
+        const creditsDisplay = document.getElementById('credits-display');
+        
+        // Elementos da App
         const imageUpload = document.getElementById('image-upload');
         const characterInput = document.getElementById('character-input');
         const resultsSection = document.getElementById('results');
@@ -99,30 +109,117 @@
 
         let lastFile = null;
         let lastCharacterName = '';
+        let currentUser = null;
 
-        imageUpload.addEventListener('change', handleImageUpload);
-
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            const characterName = characterInput.value.trim();
-            if (!file) return;
-
-            lastFile = file;
-            lastCharacterName = characterName;
-
-            if (!characterName) {
-                showError('Ops! Escreve o nome de um personagem primeiro.');
-                imageUpload.value = ''; 
-                return;
+        // Lógica de inicialização
+        window.addEventListener('load', () => {
+            currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                showApp();
+            } else {
+                showAuth();
             }
-            await processAndGenerateImage(file, characterName);
+        });
+        
+        // Trocar entre formulário de login e registo
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(registerForm.classList.contains('hidden')) {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                authToggleText.innerHTML = 'Já tem uma conta? <a href="#" id="show-login" class="text-blue-500 hover:underline">Entre aqui.</a>';
+                document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); showRegisterLink.click(); });
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                authToggleText.innerHTML = 'Não tem uma conta? <a href="#" id="show-register" class="text-blue-500 hover:underline">Registe-se aqui.</a>';
+                 document.getElementById('show-register').addEventListener('click', (e) => { e.preventDefault(); showRegisterLink.click(); });
+            }
+        });
+
+        // Submissão do formulário de registo
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authError.textContent = '';
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            try {
+                const response = await fetch(`${cloudflareWorkerUrl}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                
+                alert('Conta criada com sucesso! Por favor, faça login.');
+                showRegisterLink.click(); // Volta para o ecrã de login
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        // Submissão do formulário de login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authError.textContent = '';
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${cloudflareWorkerUrl}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                currentUser = { email, credits: data.credits };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showApp();
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showAuth();
+        });
+
+        function showApp() {
+            authSection.classList.add('hidden');
+            appContent.classList.remove('hidden');
+            updateCreditsDisplay();
+        }
+
+        function showAuth() {
+            appContent.classList.add('hidden');
+            authSection.classList.remove('hidden');
+        }
+
+        function updateCreditsDisplay() {
+            if(currentUser) {
+                creditsDisplay.textContent = `Créditos: ${currentUser.credits}`;
+            }
         }
         
-        async function retryLastAttempt() {
-            if (!lastFile || !lastCharacterName) {
-                showError("Não há nenhuma tentativa anterior para repetir.");
+        imageUpload.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            const characterName = characterInput.value.trim();
+            if (!file || !characterName) {
+                showError('Por favor, preencha o personagem e anexe uma foto.');
                 return;
             }
+            lastFile = file;
+            lastCharacterName = characterName;
+            await processAndGenerateImage(file, characterName);
+        });
+        
+        async function retryLastAttempt() {
             await processAndGenerateImage(lastFile, lastCharacterName);
         }
 
@@ -138,55 +235,43 @@
                 showLoadingSpinner();
                 await generateImage(base64Data, file.type, characterName); 
             } catch (error) {
-                console.error('Erro no processamento da imagem:', error);
                 showError('Ocorreu um erro ao processar a tua imagem.');
             }
         }
 
         async function generateImage(base64ImageData, mimeType, characterName) {
-            // **** ALTERAÇÃO IMPORTANTE ****
-            // O bloco `if` que causava o erro foi REMOVIDO daqui.
-            
             const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-            
-            if (!match || match.length !== 3) {
-                showError('Não foi possível ler o formato da imagem. Por favor, tente com outra foto.');
-                return;
-            }
-            
-            const pureBase64 = match[2];
+            if (!match) { showError('Formato de imagem inválido.'); return; }
             
             const payload = {
-                imageData: pureBase64,
+                imageData: match[2],
                 mimeType: mimeType,
-                characterName: characterName
+                characterName: characterName,
+                userEmail: currentUser.email
             };
 
             try {
-                const response = await fetch(cloudflareWorkerUrl, {
+                const response = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `O servidor respondeu com o estado ${response.status}.`);
-                }
-
                 const result = await response.json();
+                if (!response.ok) throw new Error(result.error);
                 
-                if (result.imageBase64) {
-                    const generatedImg = document.createElement('img');
-                    generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
-                    generatedImageContainer.innerHTML = '';
-                    generatedImageContainer.appendChild(generatedImg);
-                    errorMessageDiv.textContent = '';
-                } else {
-                    throw new Error('Não foi possível encontrar a imagem na resposta do servidor.');
-                }
+                const generatedImg = document.createElement('img');
+                generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
+                generatedImageContainer.innerHTML = '';
+                generatedImageContainer.appendChild(generatedImg);
+                errorMessageDiv.textContent = '';
+                
+                // Atualizar créditos
+                currentUser.credits = result.credits;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateCreditsDisplay();
+
             } catch (error) {
-                console.error('Erro ao chamar o backend:', error);
                 showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}`);
             }
         }
@@ -213,21 +298,8 @@
 
         function showError(message) {
             errorMessageDiv.textContent = message;
-            generatedImageContainer.innerHTML = `
-                <div class="text-center p-4">
-                    <p class="text-red-600 font-bold mb-4 text-lg">Oops! Algo correu mal.</p>
-                    <button onclick="retryLastAttempt()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform transform hover:scale-105">
-                        Tentar Novamente
-                    </button>
-                </div>
-            `;
+            generatedImageContainer.innerHTML = `<div class="text-center p-4"><p class="text-red-600 font-bold mb-4 text-lg">Oops! Algo correu mal.</p><button onclick="retryLastAttempt()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform transform hover:scale-105">Tentar Novamente</button></div>`;
         }
     </script>
 </body>
 </html>
-
-
-
-
-
-
