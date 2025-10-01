@@ -1,324 +1,298 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Fotos Mágicas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Baloo 2', cursive; background-color: #f0f9ff; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a7ddff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
-        .loader { border: 4px solid #fde68a; border-top: 4px solid #f97316; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #image-upload { display: none; }
-        .image-container img { max-height: 400px; width: auto; max-width: 100%; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
-        .form-container { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gerador de Fotos Mágicas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Baloo 2', cursive; background-color:#f0f9ff; }
+    .loader{ border:4px solid #fde68a; border-top:4px solid #f97316; border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite;}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .image-container img{ max-height:400px; width:auto; max-width:100%; border-radius:1rem; }
+  </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
+  <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-4xl w-full m-4">
+    <!-- (a tua UI anterior — mantive IDs iguais para não mexer em CSS) -->
+    <div id="auth-section" class="form-container">
+      <div class="text-center">
+        <h1 id="auth-title" class="text-3xl sm:text-4xl font-bold text-pink-500">Bem-vindo! ✨</h1>
+        <div id="auth-form-container">
+          <form id="login-form" class="mt-6">
+            <input type="email" id="login-email" placeholder="O seu email" required class="shadow-sm border-2 rounded-full w-full py-3 px-6 text-center mb-4">
+            <input type="password" id="login-password" placeholder="A sua palavra-passe" required class="shadow-sm border-2 rounded-full w-full py-3 px-6 text-center mb-6">
+            <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-full">Entrar</button>
+          </form>
 
-    <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-4xl w-full m-4">
-        
-        <!-- ECRÃ DE LOGIN/REGISTO (mostrado se o utilizador não estiver logado) -->
-        <div id="auth-section" class="form-container">
-            <div class="text-center">
-                <h1 id="auth-title" class="text-3xl sm:text-4xl font-bold text-pink-500">Bem-vindo! ✨</h1>
-                <div id="auth-form-container">
-                    <!-- Formulário de Login -->
-                    <form id="login-form" class="mt-6">
-                        <input type="email" id="login-email" placeholder="O seu email" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-4">
-                        <input type="password" id="login-password" placeholder="A sua palavra-passe" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-6">
-                        <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-105 shadow-lg text-xl">Entrar</button>
-                    </form>
-                    <!-- Formulário de Registo (escondido) -->
-                     <form id="register-form" class="mt-6 hidden">
-                        <input type="email" id="register-email" placeholder="O seu email" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-4">
-                        <input type="password" id="register-password" placeholder="Crie uma palavra-passe" required class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg mb-6">
-                        <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-105 shadow-lg text-xl">Criar Conta</button>
-                    </form>
-                </div>
-                 <p id="auth-toggle-text" class="text-sm text-gray-500 mt-4">Não tem uma conta? <a href="#" id="show-register" class="text-blue-500 hover:underline">Registe-se aqui.</a></p>
-                 <p id="auth-error" class="text-red-500 mt-4 font-semibold"></p>
-            </div>
+          <form id="register-form" class="mt-6 hidden">
+            <input type="email" id="register-email" placeholder="O seu email" required class="shadow-sm border-2 rounded-full w-full py-3 px-6 text-center mb-4">
+            <input type="password" id="register-password" placeholder="Crie uma palavra-passe" required class="shadow-sm border-2 rounded-full w-full py-3 px-6 text-center mb-6">
+            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-full">Criar Conta</button>
+          </form>
         </div>
+        <p id="auth-toggle-text" class="text-sm text-gray-500 mt-4">Não tem uma conta? <a href="#" id="show-register" class="text-blue-500">Registe-se aqui.</a></p>
+        <p id="auth-error" class="text-red-500 mt-4 font-semibold"></p>
+      </div>
+    </div>
 
-        <!-- APLICAÇÃO PRINCIPAL (escondida por defeito) -->
-        <div id="app-content" class="hidden">
-            <div class="text-center mb-8 relative">
-                <div class="absolute top-0 right-0">
-                    <span id="credits-display" class="font-bold text-lg text-green-600 mr-4"></span>
-                    <button id="logout-button" class="text-gray-400 hover:text-red-500" title="Sair">Sair</button>
-                </div>
-                <h1 class="text-3xl sm:text-4xl font-bold text-pink-500">A Tua Foto Mágica! ✨</h1>
-                <p class="text-gray-600 mt-2 text-lg">Junta-te ao teu personagem preferido numa aventura!</p>
-            </div>
-            
-            <div class="mb-6">
-                <label for="character-input" class="block text-sky-800 font-bold mb-3 text-center text-xl">1. Escreve um personagem</label>
-                <input type="text" id="character-input" placeholder="Ex: Mickey Mouse, Elsa..." class="shadow-sm appearance-none border-2 border-yellow-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-400 text-center text-lg">
-            </div>
-
-            <div class="flex justify-center mb-6">
-                <label for="image-upload" id="upload-label" class="bg-yellow-400 text-yellow-900 font-bold py-3 px-8 rounded-full cursor-pointer transition-transform transform hover:scale-110 shadow-lg text-xl">
-                    2. Anexar a tua foto
-                </label>
-                <input type="file" id="image-upload" accept="image/*">
-            </div>
-
-            <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
-                <div class="text-center">
-                    <h2 class="text-2xl font-semibold mb-3 text-sky-800">A Tua Foto</h2>
-                    <div id="original-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2"></div>
-                </div>
-                <div class="text-center">
-                    <h2 class="text-2xl font-semibold mb-3 text-sky-800">A Magia Aconteceu!</h2>
-                    <div id="generated-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2">
-                        <p class="text-gray-500">À espera da tua foto...</p>
-                    </div>
-                </div>
-            </div>
-             <div id="error-message" class="text-center text-red-500 mt-4 font-semibold"></div>
+    <div id="app-content" class="hidden">
+      <div class="text-center mb-8">
+        <div class="absolute top-0 right-0">
+          <span id="credits-display" class="font-bold text-lg text-green-600 mr-4"></span>
+          <button id="logout-button" class="text-gray-400 hover:text-red-500">Sair</button>
         </div>
-        <p class="text-xs text-center text-gray-400 mt-4">Versão 1.2</p>
-    </main>
+        <h1 class="text-3xl sm:text-4xl font-bold text-pink-500">A Tua Foto Mágica! ✨</h1>
+        <p class="text-gray-600 mt-2 text-lg">Junta-te ao teu personagem preferido numa aventura!</p>
+      </div>
 
-    <script>
-        // O URL do seu backend da Cloudflare.
-        const cloudflareWorkerUrl = 'https://fotomagica.lucasabreucotefis.workers.dev';
+      <div class="mb-6">
+        <label for="character-input" class="block text-sky-800 font-bold mb-3 text-center">1. Escreve um personagem</label>
+        <input type="text" id="character-input" placeholder="Ex: Mickey Mouse, Elsa..." class="shadow-sm border-2 rounded-full w-full py-3 px-6 text-center text-lg">
+      </div>
 
-        // Elementos da UI
-        const authSection = document.getElementById('auth-section');
-        const appContent = document.getElementById('app-content');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const showRegisterLink = document.getElementById('show-register');
-        const authToggleText = document.getElementById('auth-toggle-text');
-        const authError = document.getElementById('auth-error');
-        const logoutButton = document.getElementById('logout-button');
-        const creditsDisplay = document.getElementById('credits-display');
-        
-        // Elementos da App
-        const imageUpload = document.getElementById('image-upload');
-        const characterInput = document.getElementById('character-input');
-        const resultsSection = document.getElementById('results');
-        const originalImageContainer = document.getElementById('original-image-container');
-        const generatedImageContainer = document.getElementById('generated-image-container');
-        const errorMessageDiv = document.getElementById('error-message');
+      <div class="flex justify-center mb-6">
+        <label for="image-upload" id="upload-label" class="bg-yellow-400 text-yellow-900 py-3 px-8 rounded-full cursor-pointer">2. Anexar a tua foto</label>
+        <input type="file" id="image-upload" accept="image/*" style="display:none">
+      </div>
 
-        let lastFile = null;
-        let lastCharacterName = '';
-        let currentUser = null;
+      <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
+        <div class="text-center">
+          <h2 class="text-2xl font-semibold mb-3">A Tua Foto</h2>
+          <div id="original-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2"></div>
+        </div>
+        <div class="text-center">
+          <h2 class="text-2xl font-semibold mb-3">A Magia Aconteceu!</h2>
+          <div id="generated-image-container" class="image-container bg-sky-100 min-h-[200px] flex items-center justify-center rounded-2xl p-2">
+            <p class="text-gray-500">À espera da tua foto...</p>
+          </div>
+        </div>
+      </div>
 
-        // Lógica de inicialização
-        window.addEventListener('load', () => {
-            currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser) {
-                showApp();
-            } else {
-                showAuth();
-            }
-        });
-        
-        // Trocar entre formulário de login e registo
-        showRegisterLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if(registerForm.classList.contains('hidden')) {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                authToggleText.innerHTML = 'Já tem uma conta? <a href="#" id="show-login" class="text-blue-500 hover:underline">Entre aqui.</a>';
-                document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); showRegisterLink.click(); });
-            } else {
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                authToggleText.innerHTML = 'Não tem uma conta? <a href="#" id="show-register" class="text-blue-500 hover:underline">Registe-se aqui.</a>';
-                 document.getElementById('show-register').addEventListener('click', (e) => { e.preventDefault(); showRegisterLink.click(); });
-            }
-        });
+      <div class="flex justify-center mt-6">
+        <button id="generate-button" class="bg-pink-500 text-white py-3 px-8 rounded-full">Gerar Foto Mágica</button>
+      </div>
 
-        // Submissão do formulário de registo
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authError.textContent = '';
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
+      <div id="error-message" class="text-center text-red-500 mt-4 font-semibold"></div>
+    </div>
 
-            try {
-                const response = await fetch(`${cloudflareWorkerUrl}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
-                
-                alert('Conta criada com sucesso! Por favor, faça login.');
-                showRegisterLink.click(); // Volta para o ecrã de login
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
+    <p class="text-xs text-center text-gray-400 mt-4">Versão 1.3</p>
+  </main>
 
-        // Submissão do formulário de login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authError.textContent = '';
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+<script>
+  // URL do teu worker (muda para o teu endereço)
+  const cloudflareWorkerUrl = 'https://fotomagica.lucasabreucotefis.workers.dev';
 
-            try {
-                const response = await fetch(`${cloudflareWorkerUrl}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
+  // Elementos
+  const authSection = document.getElementById('auth-section');
+  const appContent = document.getElementById('app-content');
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const showRegisterLink = document.getElementById('show-register');
+  const authError = document.getElementById('auth-error');
+  const logoutButton = document.getElementById('logout-button');
+  const creditsDisplay = document.getElementById('credits-display');
 
-                currentUser = { email, credits: data.credits };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                showApp();
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
+  const imageUpload = document.getElementById('image-upload');
+  const characterInput = document.getElementById('character-input');
+  const resultsSection = document.getElementById('results');
+  const originalImageContainer = document.getElementById('original-image-container');
+  const generatedImageContainer = document.getElementById('generated-image-container');
+  const errorMessageDiv = document.getElementById('error-message');
+  const generateButton = document.getElementById('generate-button');
 
-        logoutButton.addEventListener('click', () => {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            showAuth();
-        });
+  let currentUser = null;
+  let lastBase64 = null;
+  let lastMime = null;
 
-        function showApp() {
-            authSection.classList.add('hidden');
-            appContent.classList.remove('hidden');
-            updateCreditsDisplay();
-        }
+  window.addEventListener('load', () => {
+    currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) showApp(); else showAuth();
+  });
 
-        function showAuth() {
-            appContent.classList.add('hidden');
-            authSection.classList.remove('hidden');
-        }
-
-        function updateCreditsDisplay() {
-            if(currentUser) {
-                creditsDisplay.textContent = `Créditos: ${currentUser.credits}`;
-            }
-        }
-        
-        imageUpload.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            const characterName = characterInput.value.trim();
-            if (!file || !characterName) {
-                showError('Por favor, preencha o personagem e anexe uma foto.');
-                return;
-            }
-            lastFile = file;
-            lastCharacterName = characterName;
-            await processAndGenerateImage(file, characterName);
-        });
-        
-        async function retryLastAttempt() {
-            await processAndGenerateImage(lastFile, lastCharacterName);
-        }
-
-        async function processAndGenerateImage(file, characterName) {
-            resetUI();
-            resultsSection.classList.remove('hidden');
-            try {
-                const base64Data = await fileToBase64(file);
-                const originalImg = document.createElement('img');
-                originalImg.src = base64Data;
-                originalImageContainer.innerHTML = '';
-                originalImageContainer.appendChild(originalImg);
-                showLoadingSpinner();
-                await generateImage(base64Data, characterName); 
-            } catch (error) {
-                showError('Ocorreu um erro ao processar a tua imagem.');
-            }
-        }
-
-        async function generateImage(base64ImageData, characterName) {
-    if (!currentUser || !currentUser.email) {
-        showError('Sessão inválida. Por favor, faça logout e login novamente.');
-        return;
+  showRegisterLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (registerForm.classList.contains('hidden')) {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      showRegisterLink.textContent = 'Já tem uma conta? Entre aqui.';
+    } else {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      showRegisterLink.textContent = 'Não tem uma conta? Registe-se aqui.';
     }
+  });
 
-    const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-    if (!match) { showError('Formato de imagem inválido.'); return; }
-
-    // Payload compatível com Gemini API
-    const payload = {
-        contents: [{
-            parts: [
-                { text: characterName },
-                {
-                    inlineData: {
-                        mimeType: match[1],
-                        data: match[2]
-                    }
-                }
-            ]
-        }],
-        userEmail: currentUser.email
-    };
-
-    console.log('Payload a ser enviado:', payload);
-
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    authError.textContent = '';
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
     try {
-        const response = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error);
-
-        const generatedImg = document.createElement('img');
-        generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
-        generatedImageContainer.innerHTML = '';
-        generatedImageContainer.appendChild(generatedImg);
-        errorMessageDiv.textContent = '';
-
-        // Atualizar créditos
-        currentUser.credits = result.credits;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        updateCreditsDisplay();
-
-    } catch (error) {
-        showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}. Verifique a consola (F12) para mais detalhes.`);
+      const res = await fetch(`${cloudflareWorkerUrl}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro no registo');
+      alert('Conta criada. Faça login.');
+      showRegisterLink.click();
+    } catch (err) {
+      authError.textContent = err.message;
     }
-}
+  });
 
-        
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    authError.textContent = '';
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    try {
+      const res = await fetch(`${cloudflareWorkerUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro no login');
+      currentUser = { email, credits: data.credits };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showApp();
+    } catch (err) {
+      authError.textContent = err.message;
+    }
+  });
 
-        function resetUI() {
-            errorMessageDiv.textContent = '';
-            resultsSection.classList.add('hidden');
-            originalImageContainer.innerHTML = '';
-            generatedImageContainer.innerHTML = '<p class="text-gray-500">À espera da tua foto...</p>';
-        }
+  logoutButton.addEventListener('click', () => {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    showAuth();
+  });
 
-        function showLoadingSpinner() {
-            generatedImageContainer.innerHTML = '<div class="loader"></div>';
-        }
+  function showApp() {
+    authSection.classList.add('hidden');
+    appContent.classList.remove('hidden');
+    updateCreditsDisplay();
+  }
+  function showAuth() {
+    appContent.classList.add('hidden');
+    authSection.classList.remove('hidden');
+  }
+  function updateCreditsDisplay() {
+    creditsDisplay.textContent = currentUser ? `Créditos: ${currentUser.credits}` : '';
+  }
 
-        function showError(message) {
-            errorMessageDiv.textContent = message;
-            generatedImageContainer.innerHTML = `<div class="text-center p-4"><p class="text-red-600 font-bold mb-4 text-lg">Oops! Algo correu mal.</p><button onclick="retryLastAttempt()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform transform hover:scale-105">Tentar Novamente</button></div>`;
+  // Ao escolher ficheiro -> resize e mostra preview (não inicia geração automática)
+  imageUpload.addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const characterName = characterInput.value.trim();
+    // preview local
+    const base64 = await fileToBase64(file);
+    originalImageContainer.innerHTML = '';
+    const img = document.createElement('img'); img.src = base64;
+    originalImageContainer.appendChild(img);
+    resultsSection.classList.remove('hidden');
+
+    // Faz resize no cliente (limita largura/altura a 1024)
+    const resized = await resizeImageFile(file, 1024);
+    lastBase64 = resized.dataUrl; // 'data:...;base64,...'
+    lastMime = resized.mimeType;
+  });
+
+  // Botão de gerar (o utilizador escolhe quando gerar)
+  generateButton.addEventListener('click', async () => {
+    errorMessageDiv.textContent = '';
+
+    if (!currentUser || !currentUser.email) { errorMessageDiv.textContent = 'Por favor, faça login.'; return; }
+    const characterName = characterInput.value.trim();
+    if (!characterName) { errorMessageDiv.textContent = 'Por favor, escreva o personagem.'; return; }
+    if (!lastBase64) { errorMessageDiv.textContent = 'Por favor, anexe uma foto.'; return; }
+
+    // Extrai mime e base64 puro
+    const match = lastBase64.match(/^data:(.+);base64,(.+)$/);
+    if (!match) { errorMessageDiv.textContent = 'Formato de imagem inválido.'; return; }
+    const mimeType = match[1];
+    const base64data = match[2];
+
+    // Payload simples — o worker aceita este formato
+    const payload = { imageData: base64data, mimeType, characterName, userEmail: currentUser.email };
+
+    // Mostra spinner
+    generatedImageContainer.innerHTML = '<div class="loader"></div>';
+    try {
+      const resp = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Erro ao gerar imagem');
+
+      // Mostrar imagem gerada
+      const genImg = document.createElement('img');
+      genImg.src = `data:image/png;base64,${data.imageBase64}`;
+      generatedImageContainer.innerHTML = '';
+      generatedImageContainer.appendChild(genImg);
+      // Atualiza créditos localmente
+      currentUser.credits = data.credits;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      updateCreditsDisplay();
+      errorMessageDiv.textContent = '';
+    } catch (err) {
+      generatedImageContainer.innerHTML = `<p class="text-red-600 font-bold">${err.message}</p>`;
+      errorMessageDiv.textContent = 'Não foi possível gerar a imagem. Veja a consola (F12).';
+      console.error('Erro gerar:', err);
+    }
+  });
+
+  // util: file -> dataURL
+  function fileToBase64(file) {
+    return new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // util: resize imagem no cliente (mantém mime preferível)
+  async function resizeImageFile(file, maxDim = 1024) {
+    const dataUrl = await fileToBase64(file);
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const ratio = width / height;
+        if (width > maxDim || height > maxDim) {
+          if (width >= height) { width = maxDim; height = Math.round(maxDim / ratio); }
+          else { height = maxDim; width = Math.round(maxDim * ratio); }
         }
-    </script>
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        // mantemos PNG se tinha transparência, senão JPEG para reduzir tamanho
+        const isPNG = file.type === 'image/png';
+        const mime = isPNG ? 'image/png' : 'image/jpeg';
+        const quality = 0.92;
+        const newDataUrl = canvas.toDataURL(mime, quality);
+        resolve({ dataUrl: newDataUrl, mimeType: mime });
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
+
+  // lida com pedidos OPTIONS (útil para debug local)
+  // Nota: o worker também trata CORS, mas mantemos isto para requests directas.
+  async function preflight(url) {
+    try {
+      await fetch(url, { method: 'OPTIONS' });
+    } catch (e) { /* ignore */ }
+  }
+</script>
 </body>
 </html>
-
