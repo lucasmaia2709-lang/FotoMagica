@@ -82,6 +82,7 @@
             </div>
              <div id="error-message" class="text-center text-red-500 mt-4 font-semibold"></div>
         </div>
+        <p class="text-xs text-center text-gray-400 mt-4">Versão 1.1</p>
     </main>
 
     <script>
@@ -240,12 +241,18 @@
         }
 
         async function generateImage(base64ImageData, characterName) {
+            // VERIFICAÇÃO DE SEGURANÇA ADICIONAL
+            if (!currentUser || !currentUser.email) {
+                showError('Sessão inválida. Por favor, faça logout e login novamente.');
+                return;
+            }
+
             const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
             if (!match) { showError('Formato de imagem inválido.'); return; }
             
             const payload = {
                 imageData: match[2],
-                mimeType: match[1], // CORREÇÃO: Usar o mimeType fiável da string base64
+                mimeType: match[1],
                 characterName: characterName,
                 userEmail: currentUser.email
             };
