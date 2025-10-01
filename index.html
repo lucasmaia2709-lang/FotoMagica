@@ -241,50 +241,58 @@
         }
 
         async function generateImage(base64ImageData, characterName) {
-            // VERIFICAÇÃO DE SEGURANÇA ADICIONAL
-            if (!currentUser || !currentUser.email) {
-                showError('Sessão inválida. Por favor, faça logout e login novamente.');
-                return;
-            }
+    if (!currentUser || !currentUser.email) {
+        showError('Sessão inválida. Por favor, faça logout e login novamente.');
+        return;
+    }
 
-            const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-            if (!match) { showError('Formato de imagem inválido.'); return; }
-            
-            const payload = {
-                imageData: match[2],
-                mimeType: match[1],
-                characterName: characterName,
-                userEmail: currentUser.email
-            };
-            
-            // NOVO: Ferramenta de diagnóstico
-            console.log('Payload a ser enviado:', payload);
+    const match = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!match) { showError('Formato de imagem inválido.'); return; }
 
-            try {
-                const response = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+    // Payload compatível com Gemini API
+    const payload = {
+        contents: [{
+            parts: [
+                { text: characterName },
+                {
+                    inlineData: {
+                        mimeType: match[1],
+                        data: match[2]
+                    }
+                }
+            ]
+        }],
+        userEmail: currentUser.email
+    };
 
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error);
-                
-                const generatedImg = document.createElement('img');
-                generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
-                generatedImageContainer.innerHTML = '';
-                generatedImageContainer.appendChild(generatedImg);
-                errorMessageDiv.textContent = '';
-                
-                // Atualizar créditos
-                currentUser.credits = result.credits;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateCreditsDisplay();
+    console.log('Payload a ser enviado:', payload);
 
-            } catch (error) {
-                showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}. Verifique a consola (F12) para mais detalhes.`);
-            }
-        }
+    try {
+        const response = await fetch(`${cloudflareWorkerUrl}/generate-image`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+
+        const generatedImg = document.createElement('img');
+        generatedImg.src = `data:image/png;base64,${result.imageBase64}`;
+        generatedImageContainer.innerHTML = '';
+        generatedImageContainer.appendChild(generatedImg);
+        errorMessageDiv.textContent = '';
+
+        // Atualizar créditos
+        currentUser.credits = result.credits;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        updateCreditsDisplay();
+
+    } catch (error) {
+        showError(`Não foi possível criar a foto mágica. Detalhe: ${error.message}. Verifique a consola (F12) para mais detalhes.`);
+    }
+}
+
         
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -313,3 +321,4 @@
     </script>
 </body>
 </html>
+
